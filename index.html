@@ -193,7 +193,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 <nav class="navbar">
   <div class="nav-left">
-    <div class="nav-logo">F</div>
+    <div class="nav-logo">D</div>
     <div><div class="nav-title">DIABetes AI</div><div class="nav-sub">On-Device • Zero Server</div></div>
   </div>
   <div class="nav-center">
@@ -212,7 +212,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="selector-page">
     <div class="selector-header">
       <h1>Select a <span>Government Form</span></h1>
-      <p>Choose any form below to see FormBharat auto-fill it in seconds</p>
+      <p>Choose any form below to see DIABetes auto-fill it in seconds</p>
     </div>
     <div class="form-cards" id="formCards"></div>
     <button class="start-btn" id="startBtn" disabled onclick="launchDemo()">⚡ Launch Auto-Fill Demo</button>
@@ -230,7 +230,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="demo-top-right">
         <div class="time-compare">
           <div class="time-box time-manual">🐢 Manual: <span id="manualTime">—</span></div>
-          <div class="time-box time-ai" id="aiTimeBox">⚡ FormBharat: <span id="aiTime">0.0</span>s</div>
+          <div class="time-box time-ai" id="aiTimeBox">⚡ DIABetes: <span id="aiTime">0.0</span>s</div>
         </div>
       </div>
     </div>
@@ -246,7 +246,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="selector-page">
     <div class="selector-header">
       <h1>🐛 <span>Edge Cases</span> Handled</h1>
-      <p>Real-world problems FormBharat catches that no other tool does</p>
+      <p>Real-world problems DIABetes catches that no other tool does</p>
     </div>
     <div id="edgeCasesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
   </div>
@@ -499,17 +499,17 @@ const FORMS = {
 
 // ===== EDGE CASES (Global) =====
 const EDGE_CASES = [
-  {icon:"⚠️",title:"Name Mismatch Across Documents",desc:"Aadhaar says 'Priya Sharma', PAN says 'Priya S. Sharma', Bank says 'PRIYA SHARMA'. FormBharat identifies which version each form needs and auto-selects the right one.",severity:"yellow"},
-  {icon:"📅",title:"Expired Documents",desc:"Income certificate expired 2 months ago. FormBharat alerts user BEFORE they spend 30 minutes filling the form.",severity:"red"},
-  {icon:"🔤",title:"Name Format Conversion",desc:"Passport needs UPPERCASE. Aadhaar stores Title Case. PAN needs First/Last split. FormBharat handles all format conversions automatically.",severity:"blue"},
+  {icon:"⚠️",title:"Name Mismatch Across Documents",desc:"Aadhaar says 'Priya Sharma', PAN says 'Priya S. Sharma', Bank says 'PRIYA SHARMA'. DIABetes identifies which version each form needs and auto-selects the right one.",severity:"yellow"},
+  {icon:"📅",title:"Expired Documents",desc:"Income certificate expired 2 months ago. DIABetes alerts user BEFORE they spend 30 minutes filling the form.",severity:"red"},
+  {icon:"🔤",title:"Name Format Conversion",desc:"Passport needs UPPERCASE. Aadhaar stores Title Case. PAN needs First/Last split. DIABetes handles all format conversions automatically.",severity:"blue"},
   {icon:"📐",title:"Date Format Chaos",desc:"Aadhaar returns YYYY-MM-DD. Form needs DD/MM/YYYY. Another form needs 'March 15, 2002'. Auto-converted per form requirements.",severity:"blue"},
   {icon:"🏠",title:"Address Format Differences",desc:"Aadhaar address is one long string. Some forms need it split into Line 1, Line 2, City, State, PIN separately. AI splits intelligently.",severity:"blue"},
-  {icon:"💰",title:"Income Boundary Alerts",desc:"Income ₹2.8L is close to ₹3L EWS/LIG cutoff. FormBharat warns: 'If income changes slightly, you'll fall into a different category.'",severity:"yellow"},
-  {icon:"📋",title:"Missing Fields Handling",desc:"Blood group isn't in any DigiLocker document. FormBharat highlights it and asks user to fill ONLY that one field manually.",severity:"yellow"},
-  {icon:"👨‍👧",title:"Relation Prefix Logic",desc:"Form says 'S/o, D/o, W/o'. FormBharat reads gender (Female) + marital status (Single) → auto-fills 'D/o' (Daughter of).",severity:"blue"},
+  {icon:"💰",title:"Income Boundary Alerts",desc:"Income ₹2.8L is close to ₹3L EWS/LIG cutoff. DIABetes warns: 'If income changes slightly, you'll fall into a different category.'",severity:"yellow"},
+  {icon:"📋",title:"Missing Fields Handling",desc:"Blood group isn't in any DigiLocker document. DIABetes highlights it and asks user to fill ONLY that one field manually.",severity:"yellow"},
+  {icon:"👨‍👧",title:"Relation Prefix Logic",desc:"Form says 'S/o, D/o, W/o'. DIABetes reads gender (Female) + marital status (Single) → auto-fills 'D/o' (Daughter of).",severity:"blue"},
   {icon:"📄",title:"Document Size/Format Issues",desc:"Form needs photo <50KB in JPG. DigiLocker photo is 200KB PNG. Auto-compressed and converted without quality loss.",severity:"blue"},
-  {icon:"🚫",title:"Ineligibility Pre-Check",desc:"User tries to apply for a scheme requiring SC/ST category but they are OBC. FormBharat warns BEFORE they fill 40 fields.",severity:"red"},
-  {icon:"🔁",title:"Cross-Form Learning",desc:"Same PAN mismatch appears on 3rd form in a row. FormBharat suggests: 'Update your PAN name to match Aadhaar permanently.'",severity:"yellow"},
+  {icon:"🚫",title:"Ineligibility Pre-Check",desc:"User tries to apply for a scheme requiring SC/ST category but they are OBC. DIABetes warns BEFORE they fill 40 fields.",severity:"red"},
+  {icon:"🔁",title:"Cross-Form Learning",desc:"Same PAN mismatch appears on 3rd form in a row. DIABetes suggests: 'Update your PAN name to match Aadhaar permanently.'",severity:"yellow"},
   {icon:"🌐",title:"Multi-Language Field Mapping",desc:"Form label in Hindi: 'आवेदक का पूरा नाम'. AI understands this = 'Applicant Full Name' and maps to Aadhaar data correctly.",severity:"green"},
 ];
 
@@ -610,7 +610,7 @@ function buildDemo(formKey) {
   let incomeExpired = hasIncome;
 
   fbEl.innerHTML = `
-    <div class="fb-head"><div class="fb-icon">F</div><div><div class="fb-h-name">FormBharat AI</div><div class="fb-h-tag">100% On-Device • Zero Server</div></div></div>
+    <div class="fb-head"><div class="fb-icon">F</div><div><div class="fb-h-name">DIABetes AI</div><div class="fb-h-tag">100% On-Device • Zero Server</div></div></div>
     <div class="fb-status">
       <div class="fb-s"><div class="s-dot s-green"></div><span style="color:#4ade80">Encrypted on-device vault</span></div>
       <div class="fb-s"><div class="s-dot s-blue"></div><span style="color:#60a5fa">AI: Sarvam 2B (local)</span></div>
