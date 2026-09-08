@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIAbetes AI — Live Demo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#3b82f6;--purple:#8b5cf6;--green:#22c55e;--yellow:#eab308;--red:#ef4444;--orange:#ea580c;--dark:#0f172a;--darker:#020617}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;overflow-x:hidden}
+
+/* NAVBAR */
+.navbar{background:rgba(15,23,42,0.95);backdrop-filter:blur(20px);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,0.06)}
+.nav-left{display:flex;align-items:center;gap:10px}
+.nav-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:white}
+.nav-title{font-weight:700;font-size:15px;color:white}
+.nav-sub{font-size:10px;color:#64748b}
+.nav-center{display:flex;gap:3px;background:rgba(255,255,255,0.04);padding:3px;border-radius:9px}
+.nav-tab{padding:7px 16px;border-radius:7px;border:none;background:transparent;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.nav-tab.active{background:white;color:#0f172a}
+.nav-tab:hover:not(.active){color:#cbd5e1}
+.nav-right{display:flex;align-items:center;gap:8px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.4)}50%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}
+.live-text{font-size:11px;color:#22c55e;font-weight:600}
+
+/* PAGES */
+.page{display:none;animation:fadeIn 0.3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== FORM SELECTOR PAGE ===== */
+.selector-page{padding:30px 20px;max-width:1100px;margin:0 auto}
+.selector-header{text-align:center;margin-bottom:30px}
+.selector-header h1{font-size:28px;font-weight:800;margin-bottom:6px}
+.selector-header h1 span{background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.selector-header p{color:#64748b;font-size:14px}
+
+.form-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.form-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:20px;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden}
+.form-card:hover{transform:translateY(-3px);border-color:rgba(59,130,246,0.3);box-shadow:0 8px 30px rgba(59,130,246,0.1)}
+.form-card.selected{border-color:var(--blue);background:rgba(59,130,246,0.08)}
+.form-card-icon{font-size:32px;margin-bottom:10px}
+.form-card-name{font-size:14px;font-weight:700;margin-bottom:4px}
+.form-card-ministry{font-size:11px;color:#64748b;margin-bottom:8px}
+.form-card-fields{font-size:11px;color:var(--blue);font-weight:600}
+.form-card-badge{position:absolute;top:10px;right:10px;font-size:9px;padding:3px 8px;border-radius:6px;font-weight:700}
+.badge-easy{background:rgba(34,197,94,0.15);color:#4ade80}
+.badge-medium{background:rgba(234,179,8,0.15);color:#fbbf24}
+.badge-hard{background:rgba(239,68,68,0.15);color:#f87171}
+
+.start-btn{display:block;margin:24px auto 0;background:linear-gradient(135deg,var(--blue),var(--purple));color:white;border:none;padding:14px 40px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 20px rgba(59,130,246,0.3)}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(59,130,246,0.4)}
+.start-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+
+/* ===== DEMO PAGE ===== */
+.demo-page{padding:16px;max-width:1350px;margin:0 auto}
+.demo-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.demo-top-left{display:flex;align-items:center;gap:12px}
+.back-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.back-btn:hover{background:rgba(255,255,255,0.1);color:white}
+.demo-form-name{font-size:14px;font-weight:700}
+.demo-top-right{display:flex;align-items:center;gap:10px}
+.time-compare{display:flex;gap:8px}
+.time-box{padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:4px}
+.time-manual{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171}
+.time-ai{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:#4ade80;display:none}
+.time-ai.show{display:flex}
+
+.demo-grid{display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start}
+
+/* GOVERNMENT FORM */
+.govt-form{background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.2)}
+.form-head{padding:18px 20px;color:white;display:flex;align-items:center;gap:12px}
+.form-emblem{width:42px;height:42px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.form-head-text h2{font-size:15px;font-weight:700}
+.form-head-text p{font-size:11px;opacity:0.8}
+.form-head-scheme{margin-top:6px;font-size:11px;background:rgba(255,255,255,0.1);padding:4px 10px;border-radius:5px;display:inline-block}
+
+/* Progress */
+.fill-bar{background:#f0fdf4;border-bottom:1px solid #dcfce7;padding:10px 20px;display:none;align-items:center;gap:10px}
+.fill-bar.show{display:flex}
+.fill-spinner{width:14px;height:14px;border:2px solid #22c55e;border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fill-label{font-size:12px;color:#166534;font-weight:600;white-space:nowrap}
+.fill-track{flex:1;height:5px;background:#dcfce7;border-radius:3px;overflow:hidden}
+.fill-gauge{height:100%;background:#22c55e;border-radius:3px;width:0%;transition:width 0.3s}
+.fill-count{font-size:11px;color:#166534;font-weight:700;white-space:nowrap}
+
+/* Sections */
+.form-section{border-top:1px solid #f1f5f9}
+.form-section-head{padding:12px 20px 6px;font-size:11px;font-weight:700;color:#ea580c;text-transform:uppercase;letter-spacing:0.5px}
+.form-fields{padding:8px 20px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ff{display:flex;flex-direction:column;gap:3px}
+.ff.full{grid-column:1/-1}
+.ff label{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.3px}
+.ff input,.ff select{padding:9px 11px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#94a3b8;transition:all 0.4s;outline:none;font-family:inherit}
+.ff input.filled{border-color:#86efac;background:#f0fdf4;color:#166534;font-weight:600;box-shadow:0 0 0 2px rgba(34,197,94,0.08)}
+.ff input.error{border-color:#fca5a5;background:#fef2f2;color:#dc2626;font-weight:600;box-shadow:0 0 0 2px rgba(239,68,68,0.08)}
+.ff input.warning{border-color:#fde68a;background:#fefce8;color:#a16207;font-weight:600;box-shadow:0 0 0 2px rgba(234,179,8,0.08)}
+
+/* Submit */
+.form-bottom{padding:14px 20px 18px}
+.form-submit-btn{width:100%;padding:12px;border-radius:9px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.3s;background:#e2e8f0;color:#94a3b8}
+.form-submit-btn.ready{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;box-shadow:0 4px 15px rgba(34,197,94,0.3)}
+
+/* ===== FB PANEL ===== */
+.fb-panel{background:linear-gradient(180deg,#0f172a,#1e293b);border-radius:14px;color:white;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.3);position:sticky;top:60px}
+.fb-head{padding:16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:10px}
+.fb-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;flex-shrink:0}
+.fb-h-name{font-weight:700;font-size:15px}
+.fb-h-tag{font-size:10px;color:#475569}
+
+/* Status */
+.fb-status{padding:10px 16px;display:flex;flex-direction:column;gap:6px}
+.fb-s{display:flex;align-items:center;gap:7px;font-size:11px}
+.s-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.s-green{background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,0.5)}
+.s-blue{background:#3b82f6;box-shadow:0 0 6px rgba(59,130,246,0.5)}
+.s-purple{background:#8b5cf6;box-shadow:0 0 6px rgba(139,92,246,0.5)}
+
+/* Sources */
+.fb-src{padding:10px 16px}
+.fb-src-title{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#475569;margin-bottom:8px;font-weight:700}
+.src-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.src-chip{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:7px;padding:6px 8px;display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8}
+.src-chip .ck{color:#22c55e;font-size:11px;margin-left:auto}
+.src-chip.expired{border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.05)}
+.src-chip.expired .ck{color:#f87171}
+
+/* Voice */
+.fb-voice{padding:8px 16px}
+.voice-btn{width:100%;padding:10px;border-radius:9px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#94a3b8;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s}
+.voice-btn:hover{background:rgba(255,255,255,0.06);color:white}
+.voice-btn.listening{border-color:rgba(239,68,68,0.5);background:rgba(239,68,68,0.08);color:#f87171;animation:pulse-voice 1.5s infinite}
+@keyframes pulse-voice{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.2)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+.voice-text{padding:6px 16px;font-size:11px;color:#64748b;display:none;text-align:center;font-style:italic}
+.voice-text.show{display:block}
+
+/* Auto-fill */
+.fb-action{padding:8px 16px}
+.af-btn{width:100%;padding:13px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all 0.3s;background:linear-gradient(135deg,var(--blue),var(--purple));color:white;box-shadow:0 4px 20px rgba(59,130,246,0.3)}
+.af-btn:hover{transform:translateY(-1px);box-shadow:0 6px 25px rgba(59,130,246,0.4)}
+.af-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.af-btn.filling{background:linear-gradient(135deg,#1d4ed8,#6d28d9);animation:pulse-btn 1.5s infinite}
+@keyframes pulse-btn{0%,100%{box-shadow:0 4px 20px rgba(59,130,246,0.3)}50%{box-shadow:0 4px 30px rgba(59,130,246,0.6)}}
+.af-btn.done{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 4px 20px rgba(34,197,94,0.3)}
+
+/* Edge Cases / Alerts */
+.fb-alerts{padding:0 16px 8px;display:flex;flex-direction:column;gap:6px}
+.alert{border-radius:9px;padding:10px;display:none}
+.alert.show{display:block;animation:slideUp 0.4s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.alert-warn{background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.2)}
+.alert-err{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2)}
+.alert-ok{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2)}
+.alert-info{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2)}
+.alert-head{font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.alert-warn .alert-head{color:#fbbf24}
+.alert-err .alert-head{color:#f87171}
+.alert-ok .alert-head{color:#4ade80}
+.alert-info .alert-head{color:#60a5fa}
+.alert-body{font-size:10px;color:#94a3b8;line-height:1.5}
+.alert-body strong{color:#cbd5e1}
+
+/* Edge case log */
+.edge-log{padding:8px 16px}
+.edge-title{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#475569;margin-bottom:6px;font-weight:700}
+.edge-item{display:flex;align-items:flex-start;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:10px}
+.edge-icon{flex-shrink:0;margin-top:1px}
+.edge-text{color:#94a3b8}
+.edge-text strong{color:#cbd5e1}
+
+/* Footer */
+.fb-foot{padding:10px 16px 14px}
+.fb-foot-box{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:7px;padding:8px;text-align:center;font-size:10px;color:#475569}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .demo-grid{grid-template-columns:1fr}
+  .fb-panel{position:static}
+  .form-cards{grid-template-columns:repeat(2,1fr)}
+  .form-fields{grid-template-columns:1fr}
+  .nav-center{display:none}
+}
+@media(max-width:500px){
+  .form-cards{grid-template-columns:1fr}
+  .time-compare{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-left">
+    <div class="nav-logo">F</div>
+    <div><div class="nav-title">FormBharat AI</div><div class="nav-sub">On-Device • Zero Server</div></div>
+  </div>
+  <div class="nav-center">
+    <button class="nav-tab active" onclick="switchTab('selector',this)">📋 Forms</button>
+    <button class="nav-tab" onclick="switchTab('demo',this)" id="demoTab">⚡ Demo</button>
+    <button class="nav-tab" onclick="switchTab('edge',this)">🐛 Edge Cases</button>
+  </div>
+  <div class="nav-right">
+    <div class="live-dot"></div>
+    <span class="live-text">On-Device</span>
+  </div>
+</nav>
+
+<!-- ===== FORM SELECTOR ===== -->
+<div id="pg-selector" class="page active">
+  <div class="selector-page">
+    <div class="selector-header">
+      <h1>Select a <span>Government Form</span></h1>
+      <p>Choose any form below to see FormBharat auto-fill it in seconds</p>
+    </div>
+    <div class="form-cards" id="formCards"></div>
+    <button class="start-btn" id="startBtn" disabled onclick="launchDemo()">⚡ Launch Auto-Fill Demo</button>
+  </div>
+</div>
+
+<!-- ===== DEMO PAGE ===== -->
+<div id="pg-demo" class="page">
+  <div class="demo-page">
+    <div class="demo-top">
+      <div class="demo-top-left">
+        <button class="back-btn" onclick="switchTab('selector',document.querySelector('.nav-tab'))">← Back</button>
+        <span class="demo-form-name" id="demoFormName">—</span>
+      </div>
+      <div class="demo-top-right">
+        <div class="time-compare">
+          <div class="time-box time-manual">🐢 Manual: <span id="manualTime">—</span></div>
+          <div class="time-box time-ai" id="aiTimeBox">⚡ FormBharat: <span id="aiTime">0.0</span>s</div>
+        </div>
+      </div>
+    </div>
+    <div class="demo-grid">
+      <div class="govt-form" id="govtForm"></div>
+      <div class="fb-panel" id="fbPanel"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDGE CASES PAGE ===== -->
+<div id="pg-edge" class="page">
+  <div class="selector-page">
+    <div class="selector-header">
+      <h1>🐛 <span>Edge Cases</span> Handled</h1>
+      <p>Real-world problems FormBharat catches that no other tool does</p>
+    </div>
+    <div id="edgeCasesList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
+  </div>
+</div>
+
+<script>
+// ===== FORM DATA =====
+const FORMS = {
+  scholarship: {
+    name: "NSP Scholarship",
+    icon: "🎓",
+    ministry: "Ministry of Education",
+    scheme: "Post-Matric Scholarship (UP State) AY 2024-25",
+    color: "linear-gradient(135deg,#ea580c,#dc2626)",
+    badge: "badge-easy",
+    badgeText: "23 Fields",
+    manualTime: "25 min",
+    sections: [
+      { title: "👤 Personal Details", fields: [
+        {id:"name",label:"Applicant's Full Name (as per Aadhaar)",val:"Priya Sharma"},
+        {id:"father",label:"Father's Name",val:"Rajesh Kumar Sharma"},
+        {id:"mother",label:"Mother's Name",val:"Sunita Sharma"},
+        {id:"dob",label:"Date of Birth (DD/MM/YYYY)",val:"15/03/2002"},
+        {id:"gender",label:"Gender",val:"Female"},
+        {id:"mobile",label:"Mobile Number",val:"98765 43210"},
+        {id:"email",label:"Email Address",val:"priya.sharma@email.com"},
+        {id:"category",label:"Category (SC/ST/OBC/EWS)",val:"OBC"},
+      ]},
+      { title: "🪪 Identity & Address", fields: [
+        {id:"aadhaar",label:"Aadhaar Number",val:"XXXX XXXX 0123"},
+        {id:"pan",label:"PAN Number",val:"ABCDE1234F",warn:"Name mismatch with Aadhaar"},
+        {id:"address",label:"Permanent Address",val:"123, MG Road, Hazratganj, Lucknow, UP - 226001",full:true},
+        {id:"domicile",label:"Domicile State",val:"Uttar Pradesh"},
+        {id:"income",label:"Annual Family Income (₹)",val:"2,80,000"},
+      ]},
+      { title: "🏦 Bank Details", fields: [
+        {id:"bank",label:"Bank Name",val:"State Bank of India"},
+        {id:"branch",label:"Branch Name",val:"Hazratganj, Lucknow"},
+        {id:"account",label:"Account Number",val:"123456789012"},
+        {id:"ifsc",label:"IFSC Code",val:"SBIN0001234"},
+      ]},
+      { title: "🎓 Academic Details", fields: [
+        {id:"r10",label:"10th Roll Number",val:"2345678"},
+        {id:"b10",label:"10th Board",val:"UP Board"},
+        {id:"p10",label:"10th Percentage",val:"89.4%"},
+        {id:"r12",label:"12th Roll Number",val:"8765432"},
+        {id:"b12",label:"12th Board",val:"UP Board"},
+        {id:"p12",label:"12th Percentage",val:"92.1%"},
+        {id:"stream",label:"12th Stream",val:"Science (PCM)"},
+      ]}
+    ],
+    alerts: [
+      {type:"alert-warn",icon:"⚠️",title:"Name Mismatch Detected",body:'Aadhaar: <strong>"Priya Sharma"</strong><br>PAN: <strong>"Priya S. Sharma"</strong><br>Used Aadhaar version. Consider updating PAN to match.',delay:2500},
+      {type:"alert-info",icon:"📅",title:"Income Certificate Expiring Soon",body:'Your income cert expires on <strong>31/03/2025</strong> (in 2 months). Renew before next application cycle.',delay:3500},
+      {type:"alert-ok",icon:"✅",title:"Eligibility: PASSED",body:'Income ₹2.8L < ₹3L limit • OBC Category • UP Domicile • 92.1% > 60% cutoff. <strong>All 5 criteria met.</strong>',delay:4500},
+    ],
+    edgeCases: [
+      {icon:"⚠️",text:'<strong>Name Mismatch:</strong> Aadhaar="Priya Sharma" vs PAN="Priya S. Sharma" → Used Aadhaar (form requires it)'},
+      {icon:"📅",text:'<strong>Cert Expiry:</strong> Income certificate expires 31/03/2025 — warned user to renew'},
+      {icon:"🔄",text:'<strong>Format Fix:</strong> DOB auto-converted from YYYY-MM-DD (Aadhaar format) to DD/MM/YYYY (form requires)'},
+    ]
+  },
+  passport: {
+    name: "Passport Application",
+    icon: "🛂",
+    ministry: "Ministry of External Affairs",
+    scheme: "New Passport Application (Fresh Issue)",
+    color: "linear-gradient(135deg,#1d4ed8,#1e40af)",
+    badge: "badge-medium",
+    badgeText: "19 Fields",
+    manualTime: "35 min",
+    sections: [
+      { title: "👤 Applicant Details", fields: [
+        {id:"name",label:"Given Name",val:"PRIYA"},
+        {id:"surname",label:"Surname",val:"SHARMA"},
+        {id:"dob",label:"Date of Birth (DD/MM/YYYY)",val:"15/03/2002"},
+        {id:"gender",label:"Gender",val:"Female"},
+        {id:"martial",label:"Marital Status",val:"Single"},
+        {id:"place",label:"Place of Birth",val:"Lucknow, Uttar Pradesh"},
+      ]},
+      { title: "👨‍👩‍👧 Family Details", fields: [
+        {id:"father",label:"Father's Name",val:"RAJESH KUMAR SHARMA"},
+        {id:"mother",label:"Mother's Name",val:"SUNITA SHARMA"},
+        {id:"fnat",label:"Father's Nationality",val:"Indian"},
+      ]},
+      { title: "📍 Present Address", fields: [
+        {id:"addr",label:"Full Address",val:"123, MG Road, Hazratganj",full:true},
+        {id:"district",label:"District",val:"Lucknow"},
+        {id:"state",label:"State",val:"Uttar Pradesh"},
+        {id:"pin",label:"PIN Code",val:"226001"},
+        {id:"mobile",label:"Mobile",val:"9876543210"},
+        {id:"email",label:"Email",val:"priya.sharma@email.com"},
+      ]},
+      { title: "🪪 Identity", fields: [
+        {id:"aadhaar",label:"Aadhaar Number",val:"XXXX XXXX 0123"},
+        {id:"pan",label:"PAN (if any)",val:"ABCDE1234F",warn:"Name case differs from Aadhaar"},
+        {id:"voter",label:"Voter ID (if any)",val:"UTR/02/123/456789"},
+      ]}
+    ],
+    alerts: [
+      {type:"alert-warn",icon:"⚠️",title:"Name Format: UPPERCASE Required",body:'Passport requires ALL CAPS. Auto-converted <strong>"Priya Sharma"</strong> → <strong>"PRIYA SHARMA"</strong>',delay:2000},
+      {type:"alert-info",icon:"📋",title:"ECR Check",body:'Based on your 10th pass certificate in DigiLocker, you qualify for <strong>Non-ECR</strong> (Emigration Check Not Required) category.',delay:3000},
+      {type:"alert-ok",icon:"✅",title:"All Fields Mapped",body:'19 fields auto-filled from Aadhaar + DigiLocker. <strong>No documents missing.</strong>',delay:4000},
+    ],
+    edgeCases: [
+      {icon:"🔤",text:'<strong>Case Conversion:</strong> Passport needs UPPERCASE. "Priya" → "PRIYA" auto-converted'},
+      {icon:"📝",text:'<strong>Name Split:</strong> Aadhaar has full name. Passport needs Given + Surname separately. AI split intelligently.'},
+      {icon:"🛂",text:'<strong>ECR Status:</strong> Auto-determined from education certificates in DigiLocker'},
+    ]
+  },
+  driving: {
+    name: "Driving Licence",
+    icon: "🚗",
+    ministry: "Ministry of Road Transport",
+    scheme: "New Driving Licence (LMV) Application",
+    color: "linear-gradient(135deg,#059669,#047857)",
+    badge: "badge-easy",
+    badgeText: "16 Fields",
+    manualTime: "20 min",
+    sections: [
+      { title: "👤 Personal Information", fields: [
+        {id:"name",label:"Full Name",val:"Priya Sharma"},
+        {id:"rnumber",label:"Relation (S/o, D/o, W/o)",val:"D/o Rajesh Kumar Sharma"},
+        {id:"dob",label:"Date of Birth",val:"15/03/2002"},
+        {id:"gender",label:"Gender",val:"Female"},
+        {id:"blood",label:"Blood Group",val:"B+"},
+        {id:"mobile",label:"Mobile",val:"9876543210"},
+        {id:"email",label:"Email",val:"priya.sharma@email.com"},
+      ]},
+      { title: "📍 Address", fields: [
+        {id:"addr",label:"Full Address",val:"123, MG Road, Hazratganj, Lucknow",full:true},
+        {id:"state",label:"State",val:"Uttar Pradesh"},
+        {id:"pin",label:"PIN Code",val:"226001"},
+      ]},
+      { title: "🪪 Documents", fields: [
+        {id:"aadhaar",label:"Aadhaar Number",val:"XXXX XXXX 0123"},
+        {id:"ll",label:"Learner's Licence Number",val:"UP5420230012345"},
+        {id:"lldate",label:"LL Issue Date",val:"10/01/2024"},
+        {id:"vclass",label:"Vehicle Class",val:"LMV (Light Motor Vehicle)"},
+        {id:"qual",label:"Qualification",val:"12th Pass"},
+        {id:"organ",label:"Organ Donor?",val:"Yes"},
+      ]}
+    ],
+    alerts: [
+      {type:"alert-info",icon:"📋",title:"LL Validity Check",body:'Your Learner\'s Licence was issued on <strong>10/01/2024</strong>. Minimum 30-day wait period completed. ✅',delay:2000},
+      {type:"alert-warn",icon:"⚠️",title:"Relation Format Auto-Fixed",body:'Aadhaar has "Father: Rajesh Kumar Sharma". Parivahan needs "D/o" prefix. Auto-converted.',delay:3000},
+      {type:"alert-ok",icon:"✅",title:"Ready for RTO Slot Booking",body:'All 16 fields filled. You can now book a <strong>DL test slot at Lucknow RTO</strong>.',delay:4000},
+    ],
+    edgeCases: [
+      {icon:"👨‍👧",text:'<strong>Relation Prefix:</strong> "Father\'s Name" → "D/o" (Daughter of) based on gender=Female'},
+      {icon:"📅",text:'<strong>LL Wait Period:</strong> Auto-checked that 30 days have passed since Learner\'s Licence issue'},
+      {icon:"🩸",text:'<strong>Blood Group:</strong> Not in Aadhaar/DigiLocker — prompted user to enter manually'},
+    ]
+  },
+  pancard: {
+    name: "PAN Card Application",
+    icon: "💳",
+    ministry: "Income Tax Department (NSDL)",
+    scheme: "New PAN - Form 49A",
+    color: "linear-gradient(135deg,#7c3aed,#6d28d9)",
+    badge: "badge-easy",
+    badgeText: "14 Fields",
+    manualTime: "15 min",
+    sections: [
+      { title: "👤 Personal Details", fields: [
+        {id:"lname",label:"Last Name / Surname",val:"SHARMA"},
+        {id:"fname",label:"First Name",val:"PRIYA"},
+        {id:"mname",label:"Middle Name",val:"—"},
+        {id:"dob",label:"Date of Birth",val:"15/03/2002"},
+        {id:"gender",label:"Gender",val:"Female"},
+        {id:"status",label:"Status",val:"Individual"},
+      ]},
+      { title: "👨‍👩‍👧 Parent Details", fields: [
+        {id:"father",label:"Father's Name",val:"RAJESH KUMAR SHARMA"},
+        {id:"mother",label:"Mother's Name (optional)",val:"SUNITA SHARMA"},
+      ]},
+      { title: "📍 Address & Contact", fields: [
+        {id:"addr",label:"Residence Address",val:"123, MG Road, Hazratganj",full:true},
+        {id:"city",label:"City / Town",val:"Lucknow"},
+        {id:"state",label:"State",val:"Uttar Pradesh"},
+        {id:"pin",label:"PIN Code",val:"226001"},
+        {id:"mobile",label:"Mobile",val:"9876543210"},
+        {id:"email",label:"Email",val:"priya.sharma@email.com"},
+      ]}
+    ],
+    alerts: [
+      {type:"alert-warn",icon:"⚠️",title:"No Middle Name in Aadhaar",body:'Aadhaar has <strong>"Priya Sharma"</strong> (no middle name). PAN form has a middle name field. Left blank — this is acceptable.',delay:2000},
+      {type:"alert-info",icon:"🔤",title:"Names Auto-Split",body:'Aadhaar stores full name. PAN needs First + Last separately. AI split <strong>"Priya Sharma"</strong> → First: PRIYA, Last: SHARMA.',delay:3000},
+      {type:"alert-ok",icon:"✅",title:"Ready for Submission",body:'All 14 fields filled. <strong>₹107 fee applicable.</strong> Can pay via UPI after submission.',delay:4000},
+    ],
+    edgeCases: [
+      {icon:"🔤",text:'<strong>Name Split:</strong> Full name "Priya Sharma" → First: "PRIYA", Last: "SHARMA", Middle: blank'},
+      {icon:"📝",text:'<strong>Missing Field:</strong> No middle name in source data — left blank (valid for PAN)'},
+      {icon:"💰",text:'<strong>Fee Alert:</strong> Notified user about ₹107 processing fee before submission'},
+    ]
+  },
+  pmay: {
+    name: "PM Awas Yojana",
+    icon: "🏠",
+    ministry: "Ministry of Housing",
+    scheme: "PMAY-Urban (EWS/LIG Category)",
+    color: "linear-gradient(135deg,#b45309,#92400e)",
+    badge: "badge-hard",
+    badgeText: "21 Fields",
+    manualTime: "40 min",
+    sections: [
+      { title: "👤 Primary Applicant", fields: [
+        {id:"name",label:"Full Name (as per Aadhaar)",val:"Priya Sharma"},
+        {id:"relation",label:"Relation (Husband/Father)",val:"Rajesh Kumar Sharma"},
+        {id:"dob",label:"Date of Birth",val:"15/03/2002"},
+        {id:"gender",label:"Gender",val:"Female"},
+        {id:"category",label:"Category",val:"OBC"},
+        {id:"religion",label:"Religion",val:"Hindu"},
+        {id:"aadhaar",label:"Aadhaar Number",val:"XXXX XXXX 0123"},
+      ]},
+      { title: "🏠 Property & Income", fields: [
+        {id:"own",label:"Do you own a pucca house?",val:"No"},
+        {id:"income",label:"Annual Household Income",val:"₹2,80,000"},
+        {id:"inccat",label:"Income Category",val:"EWS (< ₹3,00,000)",warn:"Close to LIG boundary"},
+        {id:"members",label:"Family Members",val:"4"},
+      ]},
+      { title: "📍 Current Address", fields: [
+        {id:"addr",label:"Full Address",val:"123, MG Road, Hazratganj, Lucknow",full:true},
+        {id:"district",label:"District",val:"Lucknow"},
+        {id:"state",label:"State",val:"Uttar Pradesh"},
+        {id:"pin",label:"PIN Code",val:"226001"},
+      ]},
+      { title: "🏦 Bank & Documents", fields: [
+        {id:"bank",label:"Bank Name",val:"State Bank of India"},
+        {id:"account",label:"Account Number",val:"123456789012"},
+        {id:"ifsc",label:"IFSC Code",val:"SBIN0001234"},
+        {id:"pan",label:"PAN Number",val:"ABCDE1234F",warn:"Name mismatch"},
+        {id:"mobile",label:"Mobile",val:"9876543210"},
+      ]}
+    ],
+    alerts: [
+      {type:"alert-warn",icon:"⚠️",title:"Income Near Category Boundary",body:'Your income <strong>₹2,80,000</strong> is close to EWS/LIG boundary (₹3L). If income increases, you\'ll fall into LIG category with different subsidy amount.',delay:2000},
+      {type:"alert-err",icon:"❌",title:"Property Ownership Check",body:'PMAY requires <strong>no existing pucca house ownership</strong>. Verified from available land records — no property found. ✅ Eligible.',delay:3500},
+      {type:"alert-warn",icon:"⚠️",title:"PAN Name Mismatch (Again!)",body:'Aadhaar: <strong>"Priya Sharma"</strong> vs PAN: <strong>"Priya S. Sharma"</strong>. This mismatch appears across multiple forms. Strongly recommend updating PAN.',delay:5000},
+      {type:"alert-ok",icon:"✅",title:"PMAY Eligibility: PASSED",body:'No pucca house ✓ • EWS income ✓ • First-time beneficiary ✓ • Aadhaar linked ✓. Estimated subsidy: <strong>₹2.67 lakh</strong>',delay:6500},
+    ],
+    edgeCases: [
+      {icon:"🏠",text:'<strong>Property Check:</strong> Cross-referenced with land records API — no property ownership found'},
+      {icon:"💰",text:'<strong>Income Boundary:</strong> ₹2.8L income is near ₹3L EWS/LIG cutoff — warned user'},
+      {icon:"🔁",text:'<strong>Recurring Mismatch:</strong> Same PAN name issue across forms — suggested permanent fix'},
+      {icon:"🧮",text:'<strong>Subsidy Calc:</strong> Auto-calculated estimated subsidy based on income category'},
+    ]
+  }
+};
+
+// ===== EDGE CASES (Global) =====
+const EDGE_CASES = [
+  {icon:"⚠️",title:"Name Mismatch Across Documents",desc:"Aadhaar says 'Priya Sharma', PAN says 'Priya S. Sharma', Bank says 'PRIYA SHARMA'. FormBharat identifies which version each form needs and auto-selects the right one.",severity:"yellow"},
+  {icon:"📅",title:"Expired Documents",desc:"Income certificate expired 2 months ago. FormBharat alerts user BEFORE they spend 30 minutes filling the form.",severity:"red"},
+  {icon:"🔤",title:"Name Format Conversion",desc:"Passport needs UPPERCASE. Aadhaar stores Title Case. PAN needs First/Last split. FormBharat handles all format conversions automatically.",severity:"blue"},
+  {icon:"📐",title:"Date Format Chaos",desc:"Aadhaar returns YYYY-MM-DD. Form needs DD/MM/YYYY. Another form needs 'March 15, 2002'. Auto-converted per form requirements.",severity:"blue"},
+  {icon:"🏠",title:"Address Format Differences",desc:"Aadhaar address is one long string. Some forms need it split into Line 1, Line 2, City, State, PIN separately. AI splits intelligently.",severity:"blue"},
+  {icon:"💰",title:"Income Boundary Alerts",desc:"Income ₹2.8L is close to ₹3L EWS/LIG cutoff. FormBharat warns: 'If income changes slightly, you'll fall into a different category.'",severity:"yellow"},
+  {icon:"📋",title:"Missing Fields Handling",desc:"Blood group isn't in any DigiLocker document. FormBharat highlights it and asks user to fill ONLY that one field manually.",severity:"yellow"},
+  {icon:"👨‍👧",title:"Relation Prefix Logic",desc:"Form says 'S/o, D/o, W/o'. FormBharat reads gender (Female) + marital status (Single) → auto-fills 'D/o' (Daughter of).",severity:"blue"},
+  {icon:"📄",title:"Document Size/Format Issues",desc:"Form needs photo <50KB in JPG. DigiLocker photo is 200KB PNG. Auto-compressed and converted without quality loss.",severity:"blue"},
+  {icon:"🚫",title:"Ineligibility Pre-Check",desc:"User tries to apply for a scheme requiring SC/ST category but they are OBC. FormBharat warns BEFORE they fill 40 fields.",severity:"red"},
+  {icon:"🔁",title:"Cross-Form Learning",desc:"Same PAN mismatch appears on 3rd form in a row. FormBharat suggests: 'Update your PAN name to match Aadhaar permanently.'",severity:"yellow"},
+  {icon:"🌐",title:"Multi-Language Field Mapping",desc:"Form label in Hindi: 'आवेदक का पूरा नाम'. AI understands this = 'Applicant Full Name' and maps to Aadhaar data correctly.",severity:"green"},
+];
+
+// ===== BUILD FORM SELECTOR =====
+function buildSelector() {
+  const container = document.getElementById('formCards');
+  container.innerHTML = '';
+  Object.entries(FORMS).forEach(([key, form]) => {
+    container.innerHTML += `
+      <div class="form-card" data-form="${key}" onclick="selectForm('${key}',this)">
+        <div class="form-card-badge ${form.badge}">${form.badgeText}</div>
+        <div class="form-card-icon">${form.icon}</div>
+        <div class="form-card-name">${form.name}</div>
+        <div class="form-card-ministry">${form.ministry}</div>
+        <div class="form-card-fields">⏱️ Manual: ${form.manualTime}</div>
+      </div>
+    `;
+  });
+}
+
+let selectedForm = null;
+
+function selectForm(key, el) {
+  document.querySelectorAll('.form-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedForm = key;
+  document.getElementById('startBtn').disabled = false;
+}
+
+function launchDemo() {
+  if (!selectedForm) return;
+  buildDemo(selectedForm);
+  switchTab('demo', document.getElementById('demoTab'));
+}
+
+// ===== BUILD DEMO =====
+function buildDemo(formKey) {
+  const form = FORMS[formKey];
+  const govtEl = document.getElementById('govtForm');
+  const fbEl = document.getElementById('fbPanel');
+
+  document.getElementById('demoFormName').textContent = form.icon + ' ' + form.name;
+  document.getElementById('manualTime').textContent = form.manualTime;
+  document.getElementById('aiTimeBox').classList.remove('show');
+
+  // Count fields
+  let totalFields = 0;
+  form.sections.forEach(s => totalFields += s.fields.length);
+
+  // Build Govt Form
+  let html = `
+    <div class="form-head" style="background:${form.color}">
+      <div class="form-emblem">${form.icon}</div>
+      <div class="form-head-text">
+        <h2>${form.name}</h2>
+        <p>${form.ministry}</p>
+        <div class="form-head-scheme">📋 ${form.scheme}</div>
+      </div>
+    </div>
+    <div class="fill-bar" id="fillBar">
+      <div class="fill-spinner"></div>
+      <span class="fill-label" id="fillLabel">Filling: 0/${totalFields}</span>
+      <div class="fill-track"><div class="fill-gauge" id="fillGauge"></div></div>
+      <span class="fill-count" id="fillCount">0%</span>
+    </div>
+  `;
+
+  form.sections.forEach(section => {
+    html += `<div class="form-section"><div class="form-section-head">${section.title}</div><div class="form-fields">`;
+    section.fields.forEach(f => {
+      html += `<div class="ff${f.full?' full':''}"><label>${f.label}</label><input type="text" id="df-${f.id}" placeholder="—" readonly></div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  html += `<div class="form-bottom"><button class="form-submit-btn" id="formSubmitBtn">⏳ Waiting for Auto-Fill...</button></div>`;
+  govtEl.innerHTML = html;
+
+  // Build FB Panel
+  let srcHtml = form.sections.some(s => s.fields.some(f => f.id.includes('bank') || f.id.includes('account') || f.id.includes('ifsc')))
+    ? '<div class="src-chip">🏦 Bank (AA) <span class="ck">✓</span></div>' : '';
+
+  let alertsHtml = '';
+  form.alerts.forEach((a, i) => {
+    alertsHtml += `<div class="alert ${a.type}" id="al-${formKey}-${i}"><div class="alert-head">${a.icon} ${a.title}</div><div class="alert-body">${a.body}</div></div>`;
+  });
+
+  let edgesHtml = '';
+  if (form.edgeCases) {
+    edgesHtml = `<div class="edge-log"><div class="edge-title">Edge Cases Handled</div>`;
+    form.edgeCases.forEach(e => {
+      edgesHtml += `<div class="edge-item" style="display:none" data-edge><div class="edge-icon">${e.icon}</div><div class="edge-text">${e.text}</div></div>`;
+    });
+    edgesHtml += `</div>`;
+  }
+
+  let hasIncome = form.sections.some(s => s.fields.some(f => f.id === 'income'));
+  let incomeExpired = hasIncome;
+
+  fbEl.innerHTML = `
+    <div class="fb-head"><div class="fb-icon">F</div><div><div class="fb-h-name">FormBharat AI</div><div class="fb-h-tag">100% On-Device • Zero Server</div></div></div>
+    <div class="fb-status">
+      <div class="fb-s"><div class="s-dot s-green"></div><span style="color:#4ade80">Encrypted on-device vault</span></div>
+      <div class="fb-s"><div class="s-dot s-blue"></div><span style="color:#60a5fa">AI: Sarvam 2B (local)</span></div>
+      <div class="fb-s"><div class="s-dot s-purple"></div><span style="color:#a78bfa">DigiLocker + AA linked</span></div>
+    </div>
+    <div class="fb-src">
+      <div class="fb-src-title">Data Sources</div>
+      <div class="src-grid">
+        <div class="src-chip">🪪 Aadhaar <span class="ck">✓</span></div>
+        <div class="src-chip">💳 PAN <span class="ck">✓</span></div>
+        ${srcHtml}
+        <div class="src-chip">📄 10th Mark <span class="ck">✓</span></div>
+        <div class="src-chip">📄 12th Mark <span class="ck">✓</span></div>
+        <div class="src-chip ${incomeExpired?'expired':''}">📋 Income ${incomeExpired?'<span class="ck">⚠️</span>':'<span class="ck">✓</span>'}</div>
+      </div>
+    </div>
+    <div class="fb-voice">
+      <button class="voice-btn" id="voiceBtn" onclick="simulateVoice()">🎙️ Voice Command: "Form bhar do"</button>
+      <div class="voice-text" id="voiceText"></div>
+    </div>
+    <div class="fb-action">
+      <button class="af-btn" id="afBtn" onclick="runAutoFill('${formKey}')">⚡ Auto-Fill All ${totalFields} Fields</button>
+    </div>
+    <div class="fb-alerts">${alertsHtml}</div>
+    ${edgesHtml}
+    <div class="fb-foot"><div class="fb-foot-box">🛡️ Data never left this device • No server contacted</div></div>
+  `;
+}
+
+// ===== VOICE SIMULATION =====
+function simulateVoice() {
+  const btn = document.getElementById('voiceBtn');
+  const text = document.getElementById('voiceText');
+  btn.classList.add('listening');
+  btn.innerHTML = '🔴 Listening...';
+  text.classList.add('show');
+  text.textContent = '';
+
+  const phrase = '"UP scholarship ka form bhar do"';
+  let i = 0;
+  const typeInt = setInterval(() => {
+    if (i < phrase.length) {
+      text.textContent = phrase.substring(0, i + 1);
+      i++;
+    } else {
+      clearInterval(typeInt);
+      setTimeout(() => {
+        btn.classList.remove('listening');
+        btn.innerHTML = '✅ Command Received!';
+        text.textContent = '🧠 Understood: "Fill UP scholarship form" → Mapping fields...';
+        setTimeout(() => {
+          if (selectedForm) runAutoFill(selectedForm);
+        }, 800);
+      }, 500);
+    }
+  }, 60);
+}
+
+// ===== AUTO-FILL ENGINE =====
+let filling = false;
+
+function runAutoFill(formKey) {
+  if (filling) return;
+  filling = true;
+
+  const form = FORMS[formKey];
+  const afBtn = document.getElementById('afBtn');
+  const fillBar = document.getElementById('fillBar');
+  const fillGauge = document.getElementById('fillGauge');
+  const fillLabel = document.getElementById('fillLabel');
+  const fillCount = document.getElementById('fillCount');
+  const aiTimeBox = document.getElementById('aiTimeBox');
+  const aiTime = document.getElementById('aiTime');
+
+  // Collect all fields
+  let allFields = [];
+  form.sections.forEach(s => s.fields.forEach(f => allFields.push(f)));
+  const total = allFields.length;
+
+  afBtn.innerHTML = '⏳ AI Mapping Fields...';
+  afBtn.classList.add('filling');
+  afBtn.disabled = true;
+  fillBar.classList.add('show');
+  aiTimeBox.classList.add('show');
+
+  let filled = 0;
+  let startTime = Date.now();
+
+  // Timer
+  const timerInt = setInterval(() => {
+    aiTime.textContent = ((Date.now() - startTime) / 1000).toFixed(1);
+  }, 100);
+
+  // Fill each field with typing animation
+  allFields.forEach((field, idx) => {
+    setTimeout(() => {
+      const input = document.getElementById('df-' + field.id);
+      if (!input) { filled++; return; }
+
+      const value = field.val;
+      let ci = 0;
+
+      // Add appropriate class
+      if (field.warn) {
+        input.classList.add('warning');
+      } else {
+        input.classList.add('filled');
+      }
+
+      // Typing effect
+      const tInt = setInterval(() => {
+        if (ci < value.length) {
+          input.value = value.substring(0, ci + 1);
+          ci++;
+        } else {
+          clearInterval(tInt);
+        }
+      }, 15);
+
+      filled++;
+      const pct = Math.round((filled / total) * 100);
+      fillGauge.style.width = pct + '%';
+      fillLabel.textContent = `Filling: ${filled}/${total}`;
+      fillCount.textContent = pct + '%';
+
+      // Done!
+      if (filled === total) {
+        clearInterval(timerInt);
+        setTimeout(() => {
+          afBtn.innerHTML = `✅ All ${total} Fields Filled!`;
+          afBtn.classList.remove('filling');
+          afBtn.classList.add('done');
+          fillLabel.textContent = `✅ Complete — ${total}/${total} fields`;
+
+          document.getElementById('formSubmitBtn').textContent = '✅ Ready to Submit with Aadhaar eSign';
+          document.getElementById('formSubmitBtn').classList.add('ready');
+
+          // Show alerts sequentially
+          form.alerts.forEach((a, i) => {
+            setTimeout(() => {
+              const alEl = document.getElementById(`al-${formKey}-${i}`);
+              if (alEl) alEl.classList.add('show');
+            }, a.delay - 2000);
+          });
+
+          // Show edge cases
+          const edgeItems = document.querySelectorAll('[data-edge]');
+          edgeItems.forEach((el, i) => {
+            setTimeout(() => {
+              el.style.display = 'flex';
+              el.style.animation = 'slideUp 0.3s ease';
+            }, 1000 + i * 500);
+          });
+
+          filling = false;
+        }, 400);
+      }
+    }, idx * 160);
+  });
+}
+
+// ===== EDGE CASES PAGE =====
+function buildEdgeCases() {
+  const container = document.getElementById('edgeCasesList');
+  const colors = {yellow:'#fbbf24',red:'#f87171',blue:'#60a5fa',green:'#4ade80'};
+  const bgs = {yellow:'rgba(234,179,8,0.06)',red:'rgba(239,68,68,0.06)',blue:'rgba(59,130,246,0.06)',green:'rgba(34,197,94,0.06)'};
+  const borders = {yellow:'rgba(234,179,8,0.15)',red:'rgba(239,68,68,0.15)',blue:'rgba(59,130,246,0.15)',green:'rgba(34,197,94,0.15)'};
+
+  container.innerHTML = '';
+  EDGE_CASES.forEach(ec => {
+    container.innerHTML += `
+      <div style="background:${bgs[ec.severity]};border:1px solid ${borders[ec.severity]};border-radius:12px;padding:18px">
+        <div style="font-size:24px;margin-bottom:8px">${ec.icon}</div>
+        <div style="font-size:13px;font-weight:700;color:${colors[ec.severity]};margin-bottom:6px">${ec.title}</div>
+        <div style="font-size:12px;color:#94a3b8;line-height:1.6">${ec.desc}</div>
+      </div>
+    `;
+  });
+}
+
+// ===== NAVIGATION =====
+function switchTab(page, tabEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('pg-' + page).classList.add('active');
+  if (tabEl) tabEl.classList.add('active');
+
+  // Reset filling state when going back
+  if (page === 'selector') {
+    filling = false;
+    selectedForm = null;
+    document.getElementById('startBtn').disabled = true;
+    document.querySelectorAll('.form-card').forEach(c => c.classList.remove('selected'));
+  }
+}
+
+// ===== INIT =====
+buildSelector();
+buildEdgeCases();
+</script>
+</body>
+</html>
